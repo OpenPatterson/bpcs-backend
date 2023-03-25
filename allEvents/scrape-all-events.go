@@ -52,7 +52,6 @@ func convertStringToTime(dateStr string) time.Time {
 	if err != nil {
 		fmt.Println("Error parsing date:", err)
 	}
-	fmt.Println(dateTime)
 	return dateTime
 }
 
@@ -146,17 +145,17 @@ func findMeetings(db *sql.DB) {
 	)
 
 	c.OnHTML(eventClass, func(e *colly.HTMLElement) {
-		log.Println("Meeting Found...")
+		// log.Println("Meeting Found...")
 		meeting := scrapeMeeting(e)
 
-		log.Println("Meeting ID:", meeting.meetingID)
-		log.Println("Meeting Time:", meeting.meetingTime)
-		log.Println("Meeting Agenda URL:", meeting.agendaURL)
-		log.Println("Meeting Agenda Packet URL:", meeting.agendaPacketURL)
-		log.Println("Meeting Minutes URL:", meeting.minutesURL)
-		log.Println("Meeting Summary URL:", meeting.summaryURL)
+		// log.Println("Meeting ID:", meeting.meetingID)
+		// log.Println("Meeting Time:", meeting.meetingTime)
+		// log.Println("Meeting Agenda URL:", meeting.agendaURL)
+		// log.Println("Meeting Agenda Packet URL:", meeting.agendaPacketURL)
+		// log.Println("Meeting Minutes URL:", meeting.minutesURL)
+		// log.Println("Meeting Summary URL:", meeting.summaryURL)
 
-		log.Println("Attempting to insert meeting into database...")
+		// log.Println("Attempting to insert meeting into database...")
 		insertErr := insertMeeting(db, meeting)
 		if insertErr != nil {
 			panic(insertErr)
@@ -181,5 +180,6 @@ func main() {
 
 	log.Println("Searching for Meetings...")
 	findMeetings(db)
+	log.Println("Completed Meeting Search and Insertion!")
 
 }
