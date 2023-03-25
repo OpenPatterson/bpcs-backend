@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly/v2"
@@ -17,7 +18,7 @@ import (
 type meeting struct {
 	meetingID       int
 	meetingLink     string
-	meetingTime     string
+	meetingTime     time.Time
 	meetingType     string
 	meetingStatus   string
 	boardType       string
@@ -40,6 +41,21 @@ func connectPlanetScale() (*sql.DB, error) {
 	return db, nil
 }
 
+func convertStringToTime(dateStr string) time.Time {
+	layout := "Monday, January 2, 2006 3:04 PM"
+	location, err := time.LoadLocation("America/Los_Angeles")
+	dateStr = strings.ReplaceAll(dateStr, "\x0d", "")
+	if err != nil {
+		fmt.Println("Error loading location:", err)
+	}
+	dateTime, err := time.ParseInLocation(layout, dateStr, location)
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+	}
+	fmt.Println(dateTime)
+	return dateTime
+}
+
 func insertMeeting(db *sql.DB, meeting meeting) error {
 	stmt, err := db.Prepare("INSERT INTO meetings (meetingID, meetingLink, meetingTime, meetingType, meetingStatus, boardType, agendaUrl, agendaPacketURL, summaryURL, minutesUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
@@ -59,7 +75,7 @@ func extractSubstring(str string, pre string, post string) string {
 	return strings.Split(strings.Split(str, pre)[1], post)[0]
 }
 
-func scrapeMeetingInfo(e *colly.HTMLElement) (int, string, string, string, string, string) {
+func scrapeMeetingInfo(e *colly.HTMLElement) (int, string, time.Time, string, string, string) {
 	url := e.ChildAttr(".RowLink a", "href")
 	meetingID := strings.Split(url, "ID=")[1]
 	meetingIDConverted, convertErr := strconv.Atoi(meetingID)
@@ -72,9 +88,11 @@ func scrapeMeetingInfo(e *colly.HTMLElement) (int, string, string, string, strin
 	if regexErr != nil {
 		panic(regexErr)
 	}
+	rawTime := extractSubstring(meetingTitle, "", "Board:")
+
 	meetingTitle = regex.ReplaceAllString(meetingTitle, "\n")
 	meetingLink := "https://pattersonca.iqm2.com/Citizens/Detail_Meeting.aspx?ID=" + meetingID
-	meetingTime := extractSubstring(meetingTitle, "", "Board:")
+	meetingTime := convertStringToTime(rawTime)
 	boardType := extractSubstring(meetingTitle, "Board:", "Type:")
 	meetingType := extractSubstring(meetingTitle, "Type:", "Status:")
 	meetingStatus := extractSubstring(meetingTitle, "Status:", "Council Chambers")
