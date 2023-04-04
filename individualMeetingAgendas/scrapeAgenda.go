@@ -13,6 +13,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var STARTING_DATE = "'2023-01-01 00:00:00'"
+
 func connectPlanetScale() (*sql.DB, error) {
 	dotEnvErr := godotenv.Load(".env")
 	if dotEnvErr != nil {
@@ -26,32 +28,41 @@ func connectPlanetScale() (*sql.DB, error) {
 	return db, nil
 }
 
+func getAllMeetingIDs(db *sql.DB) []int {
+	var meetingIDS []int
+	rows, err := db.Query("SELECT DISTINCT meetingID FROM meetings WHERE meetingTime >=" + STARTING_DATE + ";")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var meetingID int
+		err = rows.Scan(&meetingID)
+		if err != nil {
+			panic(err)
+		}
+		meetingIDS = append(meetingIDS, meetingID)
+	}
+	return meetingIDS
+}
+
 func insertPlanetScale(meetingID int, agenda string, db *sql.DB) {
 	stmt, err := db.Prepare("INSERT INTO agendas (meetingID, agendaMD) VALUES (?, ?)")
 	if err != nil {
 		panic(err.Error())
 	}
+	defer stmt.Close()
 	_, err = stmt.Exec(meetingID, agenda)
 	if err != nil {
 		panic(err.Error())
 	}
 }
 
-// Sometimes there is no agenda, see: https://pattersonca.iqm2.com/Citizens/Detail_Meeting.aspx?ID=1121
-// If there is no agenda make empty document? or document with "No Agenda" in it? Next.JS will put all downloads at top of page
-
-//Test following pages
-// https://pattersonca.iqm2.com/Citizens/Detail_Meeting.aspx?ID=1373
-// https://pattersonca.iqm2.com/Citizens/Detail_Meeting.aspx?ID=1121
-// https://pattersonca.iqm2.com/Citizens/Detail_Meeting.aspx?ID=1401
-
 func scrapeAgenda(e *colly.HTMLElement) string {
 	agenda := ""
 	result := ""
 	e.ForEach("td", func(_ int, e *colly.HTMLElement) {
 		if e.Text != "" {
-			// fmt.Println("Children", e.DOM.Children().Length(), "Num Class?", e.DOM.HasClass("Num"), "Title Class", e.DOM.HasClass("Title"), "Colspan?", e.Attr("colspan"), "Text:", e.Text)
-
 			if e.DOM.HasClass("Num") {
 				result += e.Text
 			} else {
@@ -82,21 +93,16 @@ func scrapeAgenda(e *colly.HTMLElement) string {
 	return agenda
 }
 
-func findAgendas(meetingID string, db *sql.DB) {
-	url := "https://pattersonca.iqm2.com/Citizens/Detail_Meeting.aspx?ID=" + meetingID
+func findAgendas(meetingID int, db *sql.DB) {
+	meetingIDString := strconv.Itoa(meetingID)
+	url := "https://pattersonca.iqm2.com/Citizens/Detail_Meeting.aspx?ID=" + meetingIDString
 	eventID := "#ContentPlaceholder1_lblOutline"
 	c := colly.NewCollector(
-		// Visit only domains: pattersonca.iqm2.com
 		colly.AllowedDomains("pattersonca.iqm2.com"),
 	)
 	c.OnHTML(eventID, func(e *colly.HTMLElement) {
-		// log.Println("Meeting Found...")
 		agenda := scrapeAgenda(e)
-		meetingIDString, err := strconv.Atoi(meetingID)
-		if err != nil {
-			panic(err)
-		}
-		insertPlanetScale(meetingIDString, agenda, db)
+		insertPlanetScale(meetingID, agenda, db)
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println("Visiting", r.URL.String())
@@ -109,6 +115,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	findAgendas("1401", db)
+
+	allMeetingIDS := getAllMeetingIDs(db)
+
+	for _, meetingID := range allMeetingIDS {
+		findAgendas(meetingID, db)
+	}
+
 	defer db.Close()
 }
