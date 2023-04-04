@@ -85,7 +85,7 @@ func scrapeAgenda(e *colly.HTMLElement) string {
 					spltLink := strings.Split(link, "&Type")[0]
 					result += " [Link](https://pattersonca.iqm2.com/Citizens/" + spltLink + ")"
 				}
-				agenda += result + " \\n "
+				agenda += result + " \n "
 				result = ""
 			}
 		}
