@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly/v2"
@@ -25,11 +26,16 @@ func connectPlanetScale() (*sql.DB, error) {
 	return db, nil
 }
 
-// Iterate through td elements
-// If HasClass("Num") then it's a number, store it
-// If HasClass("Title") then it's a title, store it and check for any links below it <a class="Link"
-// If there is e.Attr("colspan") then it's a continuation of the previous item
-// To get the text of the item, use e.Text
+func insertPlanetScale(meetingID int, agenda string, db *sql.DB) {
+	stmt, err := db.Prepare("INSERT INTO agendas (meetingID, agendaMD) VALUES (?, ?)")
+	if err != nil {
+		panic(err.Error())
+	}
+	_, err = stmt.Exec(meetingID, agenda)
+	if err != nil {
+		panic(err.Error())
+	}
+}
 
 // Sometimes there is no agenda, see: https://pattersonca.iqm2.com/Citizens/Detail_Meeting.aspx?ID=1121
 // If there is no agenda make empty document? or document with "No Agenda" in it? Next.JS will put all downloads at top of page
@@ -39,7 +45,8 @@ func connectPlanetScale() (*sql.DB, error) {
 // https://pattersonca.iqm2.com/Citizens/Detail_Meeting.aspx?ID=1121
 // https://pattersonca.iqm2.com/Citizens/Detail_Meeting.aspx?ID=1401
 
-func scrapeAgenda(e *colly.HTMLElement) int {
+func scrapeAgenda(e *colly.HTMLElement) string {
+	agenda := ""
 	result := ""
 	e.ForEach("td", func(_ int, e *colly.HTMLElement) {
 		if e.Text != "" {
@@ -54,24 +61,28 @@ func scrapeAgenda(e *colly.HTMLElement) int {
 					panic(err)
 				}
 				indent = 10 - indent
-				if link != "" {
-					result += e.Text
-					fmt.Println("Complete line at indent:", indent, result, "With Link:", link)
-					result = ""
-				} else {
-					result += e.Text
-					fmt.Println("Complete line at indent:", indent, result)
-					result = ""
+				if indent == 0 {
+					result = "### " + result + e.Text
 				}
-
+				if indent == 1 {
+					result = "- " + result + e.Text
+				}
+				if indent == 2 {
+					result = "    - " + result + e.Text
+				}
+				if link != "" {
+					spltLink := strings.Split(link, "&Type")[0]
+					result += " [Link](https://pattersonca.iqm2.com/Citizens/" + spltLink + ")"
+				}
+				agenda += result + " \\n "
+				result = ""
 			}
 		}
 	})
-	// fmt.Println(e)
-	return 0
+	return agenda
 }
 
-func findAgendas(meetingID string) {
+func findAgendas(meetingID string, db *sql.DB) {
 	url := "https://pattersonca.iqm2.com/Citizens/Detail_Meeting.aspx?ID=" + meetingID
 	eventID := "#ContentPlaceholder1_lblOutline"
 	c := colly.NewCollector(
@@ -81,7 +92,11 @@ func findAgendas(meetingID string) {
 	c.OnHTML(eventID, func(e *colly.HTMLElement) {
 		// log.Println("Meeting Found...")
 		agenda := scrapeAgenda(e)
-		fmt.Print("ignore", agenda)
+		meetingIDString, err := strconv.Atoi(meetingID)
+		if err != nil {
+			panic(err)
+		}
+		insertPlanetScale(meetingIDString, agenda, db)
 	})
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println("Visiting", r.URL.String())
@@ -90,5 +105,10 @@ func findAgendas(meetingID string) {
 }
 
 func main() {
-	findAgendas("1373")
+	db, err := connectPlanetScale()
+	if err != nil {
+		panic(err)
+	}
+	findAgendas("1401", db)
+	defer db.Close()
 }

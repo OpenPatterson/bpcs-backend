@@ -1,0 +1,90 @@
+1. Call to Order
+    1. Roll Call 
+    (With Link: Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8115&Type=80&CssClass= style=)
+2. Pledge of Allegiance
+3. Statements of Conflict 
+(With Link: Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8117&Type=70&CssClass= style=)
+4. Items from the Public 
+(With Link: Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8118&Type=70&CssClass= style=)
+5. City Staff Reports
+    1. Staff Recommends Council to Approve Resolution No. 2023-01 Ratifying the Director of Emergency Services Proclamation of Existence of a Local Emergency. 
+    (With Link: Detail_LegiFile.aspx?Frame=&MeetingID=1373&MediaPosition=&ID=2028&CssClass=)
+    Staff Report Printout 
+    (With Link: FileOpen.aspx?Type=30&ID=11603&MeetingID=1373)
+        a. Resolution No. 2023-01 Ratifying Local Emergency Proclamation Regarding Weather 
+        (With Link: FileOpen.aspx?Type=4&ID=3162&MeetingID=1373)
+        b. Exhibit A - Proclamation of Local Emergency Regarding Weather 
+        (With Link: FileOpen.aspx?Type=4&ID=3161&MeetingID=1373)
+6. City Council Reports
+    A. Councilmember Alves 
+    (With Link: Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8124&Type=70&CssClass= style=)
+        Stanislaus Homeless Alliance ( Councilmember Roque alternate)
+    B. Councilmember Romero
+        Westside Health Care Task Force (Councilmember Alves alternate)
+    C. Councilmember Farinha 
+    (With Link: Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8128&Type=70&CssClass= style=)
+        San Joaquin Valley Air Pollution Control District (Councilmember Romero alternate)
+    D. Mayor Pro Tem Roque 
+    (With Link: Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8130&Type=70&CssClass= style=)
+        (EDAC) Stanislaus County Economic Development Action Committee (Mayor Clauzel alternate)
+        Workforce Development Board (Mayor Clauzel alternate)
+    E. Mayor Clauzel
+        Stanislaus County Mayors Meeting 
+        (With Link: Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8134&Type=50&CssClass= style=)
+        StanCOG (Mayor Pro Tem Roque alternate)
+        League of California Cities (Councilmember Farinha 1st alternate, Councilmember Alves 2nd alternate)
+7. Other Matters 
+(With Link: Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8137&Type=70&CssClass= style=)
+8. Adjournment 
+(With Link: Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8138&Type=70&CssClass= style=)
+
+Result:
+Storing by level and parent
+{
+    1 : {
+        1 : {
+            "Text": "Call to Order",
+            "Link": "Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8115&Type=80&CssClass= style="
+            },
+        2 : {
+            "Text": "Pledge of Allegiance",
+            "Link": "#"
+            },
+        3 : {
+            "Text": "Statements of Conflict",
+            "Link": "Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8117&Type=70&CssClass= style="
+            }, 
+        4 : {
+            "Text": "Items from the Public",
+            "Link": "Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8118&Type=70&CssClass= style="
+            }, 
+        5 : {
+            "Text": "City Staff Reports",
+            "Link": "#"
+            }, 
+        6 : {
+            "Text": "City Council Reports",
+            "Link": "#"
+            }, 
+        7 : {
+            "Text": "Other Matters",
+            "Link": "Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8137&Type=70&CssClass= style="
+            }, 
+        8 : {
+            "Text": "Adjournment",
+            "Link": "Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8138&Type=70&CssClass= style="
+            }, 
+    },
+    2 : {
+        1 : {
+            "Text" : "Roll Call",
+            "Link" : "Detail_Motion.aspx?Frame=&MeetingID=1373&MinutesID=1305&MediaPosition=&ID=8115&Type=80&CssClass= style=",
+            "Parent" : 1
+            },
+        2 : {
+            "Text" : "Staff Recommends Council to Approve Resolution No. 2023-01 Ratifying the Director of Emergency Services Proclamation of Existence of a Local Emergency.",
+            "Link" : "Detail_LegiFile.aspx?Frame=&MeetingID=1373&MediaPosition=&ID=2028&CssClass=",
+            "Parent" : 5
+        }
+    }
+}
