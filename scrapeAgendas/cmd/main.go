@@ -8,11 +8,13 @@ import (
 	"strings"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly/v2"
+
+	// "github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
-var STARTING_DATE = "'2023-01-01 00:00:00'"
+var STARTING_DATE = "'2024-01-01 00:00:00'"
 
 func connectPlanetScale() (*sql.DB, error) {
 	// dotEnvErr := godotenv.Load(".env")
@@ -20,7 +22,7 @@ func connectPlanetScale() (*sql.DB, error) {
 	// 	log.Fatal("Error loading .env file")
 	// }
 
-	db, err := sql.Open("mysql", os.Getenv("DSN"))
+	db, err := sql.Open("postgres", os.Getenv("POSTGRES_URL"))
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +48,7 @@ func getAllMeetingIDs(db *sql.DB) []int {
 }
 
 func insertPlanetScale(meetingID int, agenda string, db *sql.DB) {
-	stmt, err := db.Prepare("INSERT INTO agendas (meetingID, agendaMD) VALUES (?, ?)")
+	stmt, err := db.Prepare("INSERT INTO agendas (meetingID, agendaMD) VALUES ($1, $2)")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -125,5 +127,6 @@ func Handler() {
 }
 
 func main() {
+	// Handler()
 	lambda.Start(Handler)
 }

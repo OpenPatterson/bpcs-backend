@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocolly/colly/v2"
+	_ "github.com/lib/pq"
 )
 
 type meeting struct {
@@ -34,7 +34,7 @@ func connectPlanetScale() (*sql.DB, error) {
 	// 	log.Fatal("Error loading .env file")
 	// }
 
-	db, err := sql.Open("mysql", os.Getenv("DSN"))
+	db, err := sql.Open("postgres", os.Getenv("POSTGRES_URL"))
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func convertStringToTime(dateStr string) time.Time {
 }
 
 func insertMeeting(db *sql.DB, meeting meeting) error {
-	stmt, err := db.Prepare("INSERT INTO meetings (meetingID, meetingLink, meetingTime, meetingType, meetingStatus, boardType, agendaUrl, agendaPacketURL, summaryURL, minutesUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO meetings (meetingID, meetingLink, meetingTime, meetingType, meetingStatus, boardType, agendaUrl, agendaPacketURL, summaryURL, minutesUrl) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)")
 	if err != nil {
 		return err
 	}
@@ -148,12 +148,12 @@ func findMeetings(db *sql.DB) {
 		// log.Println("Meeting Found...")
 		meeting := scrapeMeeting(e)
 
-		// log.Println("Meeting ID:", meeting.meetingID)
-		// log.Println("Meeting Time:", meeting.meetingTime)
-		// log.Println("Meeting Agenda URL:", meeting.agendaURL)
-		// log.Println("Meeting Agenda Packet URL:", meeting.agendaPacketURL)
-		// log.Println("Meeting Minutes URL:", meeting.minutesURL)
-		// log.Println("Meeting Summary URL:", meeting.summaryURL)
+		log.Println("Meeting ID:", meeting.meetingID)
+		log.Println("Meeting Time:", meeting.meetingTime)
+		log.Println("Meeting Agenda URL:", meeting.agendaURL)
+		log.Println("Meeting Agenda Packet URL:", meeting.agendaPacketURL)
+		log.Println("Meeting Minutes URL:", meeting.minutesURL)
+		log.Println("Meeting Summary URL:", meeting.summaryURL)
 
 		// log.Println("Attempting to insert meeting into database...")
 		insertErr := insertMeeting(db, meeting)
@@ -181,7 +181,7 @@ func Handler() {
 	}
 	db.Ping()
 
-	log.Println("Successfully connected to PlanetScale!")
+	log.Println("Successfully connected to Database!")
 
 	log.Println("Searching for Meetings...")
 	findMeetings(db)
